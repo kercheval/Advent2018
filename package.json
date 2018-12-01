@@ -4,6 +4,7 @@
   "description": "https://adventofcode.com/ 2018",
   "main": "index.js",
   "scripts": {
+    "day1": "node day1.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "eslintConfig": {
