@@ -1,7 +1,7 @@
 console.log("Day 1!");
 
-var fs = require('fs');
-var inputData;
+const fs = require('fs');
+let inputData;
 
 try {
   inputData = fs.readFileSync('day1.dat', 'utf8');
@@ -11,20 +11,20 @@ try {
 
 // Part 1
 
-var frequencyArray = inputData.split('\n');
-var frequencySet = new Set();
+let frequencyArray = inputData.split('\n');
+let frequencySet = new Set();
 
-var firstDuplicateFrequencyFound = false;
-var firstDuplicateFrequency;
+let firstDuplicateFrequencyFound = false;
+let firstDuplicateFrequency = undefined;
 
-var frequency = 0;
-var iteration = 0;
+let frequency = 0;
+let iteration = 0;
 
 frequencySet.add(0);
 
 iteration++;
 frequencyArray.forEach(function(element) {
-  var parsed = parseInt(element);
+  let parsed = parseInt(element);
   if (isNaN(parsed)) { return }
   frequency = frequency + parsed;
   if (!firstDuplicateFrequencyFound && frequencySet.has(frequency)) {
@@ -41,7 +41,7 @@ console.log('First Iteration End Frequency: ', frequency);
 while (!firstDuplicateFrequencyFound) {
   iteration++;
   frequencyArray.forEach(function(element) {
-    var parsed = parseInt(element);
+    let parsed = parseInt(element);
     if (isNaN(parsed)) { return }
     frequency = frequency + parsed;
     if (!firstDuplicateFrequencyFound && frequencySet.has(frequency)) {

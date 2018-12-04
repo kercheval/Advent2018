@@ -6,6 +6,7 @@
     "day1": "node day1.js"
   },
   "eslintConfig": {
+    "parserOptions": { "ecmaVersion": 6 }
   },
   "author": "",
   "license": "ISC",

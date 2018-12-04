@@ -1,6 +1,6 @@
 console.log("Day 2!");
 
-let fs = require('fs');
+const fs = require('fs');
 let inputData;
 
 try {
@@ -27,11 +27,13 @@ packageIds.forEach(function(element) {
 
   let foundTwo = false;
   let foundThree = false;
-  for (let n in collector) {
-    if (collector[n] === 2) {
-      foundTwo = true;
-    } else if (collector[n] === 3) {
-      foundThree = true;
+  for (let key in collector) {
+    if (collector.hasOwnProperty(key)) {
+      if (collector[key] === 2) {
+        foundTwo = true;
+      } else if (collector[key] === 3) {
+        foundThree = true;
+      }
     }
   }
   if (foundTwo) {
