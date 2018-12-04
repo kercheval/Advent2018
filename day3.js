@@ -12,7 +12,6 @@ try {
 const rawClaims = inputData.split('\n');
 const claims = {};
 
-const claimRegex = /\s*#[0-9]+\s*@\s*[0-9]+,[0-9]+:\s*[0-9]+x[0-9]+\s*/ig;
 function Claim(claimString) {
   parsed = claimString.split(/[#@ ,:x]+/);
   this.id = parseInt(parsed[1]);
