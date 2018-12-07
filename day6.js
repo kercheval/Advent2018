@@ -21,6 +21,17 @@ function getDistance(coordinate1, coordinate2) {
   return Math.abs(coordinate2.x - coordinate1.x) + Math.abs(coordinate2.y - coordinate1.y)
 }
 
+function createGrid(width, height, defaultValue) {
+  let grid = new Array(width);
+  for (let column = 0; column <= width; column++) {
+    grid[column] = new Array(height);
+    for (let row = 0; row <= height; row++) {
+      grid[column][row] = defaultValue;
+    }
+  }
+  return grid;
+}
+
 let rawCoordinates = inputData.split('\n');
 let coordinates = [];
 rawCoordinates.forEach(function(rawCoordinate) {
@@ -44,26 +55,22 @@ coordinates.forEach(function(coordinate) {
 
 console.log('Max X =', maxX, ', Max Y =', maxY);
 
-// Create the grid
-let grid = new Array(maxX);
-for (let column = 0; column <= maxX; column++) {
-  grid[column] = new Array(maxY);
-  for (let row = 0; row <= maxY; row++) {
-    grid[column][row] = -1;
-  }
-}
+// Create the gridClosestPath
+let gridClosestPath = createGrid(maxX, maxY, -1);
+let gridPathSum = createGrid(maxX, maxY, 0);
 
-// Calculate closest coordinate for each item on grid
+// Calculate closest coordinate for each item on gridClosestPath
 for (let column = 0; column <= maxX; column++) {
   for (let row = 0; row <= maxY; row++) {
     let minDistance = Number.MAX_SAFE_INTEGER;
     for (let coordinateId = 0; coordinateId < coordinates.length; coordinateId++) {
       let distance = getDistance(coordinates[coordinateId], {x: column, y: row});
+      gridPathSum[column][row] = gridPathSum[column][row] + distance;
       if (distance === minDistance) {
-        grid[column][row] = -1;
+        gridClosestPath[column][row] = -1;
       } else if (distance < minDistance) {
         minDistance = distance;
-        grid[column][row] = coordinateId;
+        gridClosestPath[column][row] = coordinateId;
       }
     }
   }
@@ -73,16 +80,16 @@ for (let column = 0; column <= maxX; column++) {
 let coordinateCount = {};
 for (let column = 0; column <= maxX; column++) {
   for (let row = 0; row <= maxY; row++) {
-    let currentId = grid[column][row];
+    let currentId = gridClosestPath[column][row];
     if (currentId >= 0) {
-      let currentCount = coordinateCount[grid[column][row]];
+      let currentCount = coordinateCount[gridClosestPath[column][row]];
       if (currentCount !== -1) {
         if (column === 0 || column === maxX || row === 0 || row === maxY) {
-          coordinateCount[grid[column][row]] = -1;
+          coordinateCount[gridClosestPath[column][row]] = -1;
         } else if (!currentCount) {
-          coordinateCount[grid[column][row]] = 1;
+          coordinateCount[gridClosestPath[column][row]] = 1;
         } else {
-          coordinateCount[grid[column][row]] = currentCount + 1;
+          coordinateCount[gridClosestPath[column][row]] = currentCount + 1;
         }
       }
     }
@@ -106,5 +113,15 @@ console.log('Max area of', maxArea, 'found for coordinate id', maxAreaId);
 
 // Part 2
 
+let pathSumCount = 0;
+for (let column = 0; column <= maxX; column++) {
+  for (let row = 0; row <= maxY; row++) {
+    if (gridPathSum[column][row] < 10000) {
+      pathSumCount++;
+    }
+  }
+}
+
+console.log('Area of locations with restricted distance sum', pathSumCount);
 
 console.log('END');
