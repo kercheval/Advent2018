@@ -22,24 +22,28 @@ rawSteps.forEach(function(step) {
   }
 });
 
-// Create the dependency graph
-let sortedSteps = Array.from(steps).sort();
-let buildGraph = {};
-sortedSteps.forEach(function(step) {
-  buildGraph[step] = {
-    completed: false,
-    dependencies: []
-  }
-});
+function getStepTime(step) {
+  return 61 + (step.charCodeAt(0) - 'A'.charCodeAt(0));
+}
 
-dependencies.forEach(function(dependency) {
-  buildGraph[dependency.step].dependencies.push(dependency.dependsOn);
-});
-
-dependencies.forEach(function(dependency) {
-  buildGraph[dependency.step].dependencies.sort();
-});
-
+function initGraph(steps) {
+  let buildGraph = {};
+  steps.forEach(function(step) {
+    buildGraph[step] = {
+      completed: false,
+      cost: getStepTime(step),
+      work: 0,
+      dependencies: []
+    }
+  });
+  dependencies.forEach(function(dependency) {
+    buildGraph[dependency.step].dependencies.push(dependency.dependsOn);
+  });
+  dependencies.forEach(function(dependency) {
+    buildGraph[dependency.step].dependencies.sort();
+  });
+  return buildGraph
+}
 
 function getAvailableSteps(step) {
   let availableSteps = new Set();
@@ -56,11 +60,10 @@ function getAvailableSteps(step) {
   return availableSteps;
 }
 
-/*
-function getStepTime(step) {
-  return 1 + (step.charCodeAt(0) - 'A'.charCodeAt(0));
-}*/
+// Part 1
 
+let sortedSteps = Array.from(steps).sort();
+let buildGraph = initGraph(sortedSteps);
 let stepOrder = [];
 let stepsFound = false;
 do {
@@ -81,22 +84,51 @@ do {
   }
 } while (stepsFound);
 
-
-/* Recursive implementation - Not sort ordered on graph leaves
-function completeStep(step) {
-  if (!buildGraph[step].completed) {
-    buildGraph[step].dependencies.forEach(function(dependencyStep) {
-      completeStep(dependencyStep);
-    })
-    buildGraph[step].completed = true;
-    stepOrder.push(step);
-  }
-}
-
-sortedSteps.forEach(function(step) {
-  completeStep(step);
-});
-*/
 console.log('All steps completed in order', stepOrder.join(''));
+
+// Part 2
+
+buildGraph = initGraph(sortedSteps);
+stepOrder = [];
+stepsFound = false;
+let totalTicks = 0;
+let workPerTick = 5;
+let workersAvailable = workPerTick;
+do {
+  let availableSteps = new Set();
+  sortedSteps.forEach(function(dependencyStep) {
+    getAvailableSteps(dependencyStep).forEach(function(availableStep) {
+      availableSteps.add(availableStep);
+    });
+  });
+  if (availableSteps.size) {
+    stepsFound = true;
+    let workThisTick = 0;
+    Array.from(availableSteps).sort().forEach((function(stepToComplete) {
+      let step = buildGraph[stepToComplete];
+      if (step.work > 0) {
+        step.work++;
+        workThisTick++;
+      } else if (workThisTick < workPerTick && workersAvailable) {
+        step.work++;
+        workThisTick++;
+        workersAvailable--;
+      }
+    }));
+    Array.from(availableSteps).sort().forEach((function(stepToComplete) {
+      let step = buildGraph[stepToComplete];
+      if (step.work >= step.cost) {
+        buildGraph[stepToComplete].completed = true;
+        workersAvailable++;
+        stepOrder.push(stepToComplete);
+      }
+    }));
+    totalTicks++;
+  } else {
+    stepsFound = false;
+  }
+} while (stepsFound);
+
+console.log('All timed steps completed in', totalTicks, 'seconds in order', stepOrder.join(''));
 
 console.log('END');
