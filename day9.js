@@ -21,35 +21,59 @@ function getNextPlayer(currentPlayer) {
   return currentPlayer;
 }
 
+function Marble(value, insertMarble) {
+  this.value = value;
+  this.next = this;
+  this.previous = this;
+  if (!insertMarble) {
+    insertMarble = this;
+  }
+  this.next = insertMarble;
+  this.previous = insertMarble.previous;
+  insertMarble.previous = this;
+  this.previous.next = this;
+}
+
 let circle;
 function initCircle() {
-  circle = [0];
-  return 0;
+  circle = new Marble(0);
+  return circle;
 }
 
-function getInsertionIndex(currentIndex) {
-  let newIndex = currentIndex + 1;
-  return newIndex % circle.length + 1;
+function getInsertAt(currentMarble) {
+  return currentMarble.next.next;
 }
 
-function getDeletionIndex(currentIndex) {
-  let newIndex = currentIndex - 7;
-  if (newIndex < 0) {
-    newIndex += circle.length;
+function getDeleteAt(currentMarble) {
+  let marbleToDelete = currentMarble;
+  for (let i = 0; i < 7; i++) {
+    marbleToDelete = marbleToDelete.previous;
   }
-  return newIndex;
+  return marbleToDelete
 }
 
 function insertMarble(currentMarble, value) {
-  circle.splice(currentMarble, 0, value);
+  return new Marble(value, currentMarble);
 }
 
 function deleteMarble(currentMarble) {
-  circle.splice(currentMarble, 1);
+  let nextMarble = currentMarble.next;
+  currentMarble.next.previous = currentMarble.previous;
+  currentMarble.previous.next = currentMarble.next;
+  return nextMarble;
 }
 
 function getMarbleValue(currentMarble) {
-  return circle[currentMarble];
+  return currentMarble.value;
+}
+
+function printCircle() {
+  console.log('----')
+  let currentMarble = circle;
+  do {
+    console.log(currentMarble.value);
+    currentMarble = currentMarble.next;
+  } while (currentMarble.next !== circle);
 }
 
 function playGame(maxMarbleValue) {
@@ -66,18 +90,21 @@ function playGame(maxMarbleValue) {
   for (let i = 1; i <= maxMarbleValue; i++) {
     currentPlayer = getNextPlayer(currentPlayer);
     if (i % 23) {
-      currentMarble = getInsertionIndex(currentMarble);
-      insertMarble(currentMarble, i);
+      currentMarble = getInsertAt(currentMarble);
+      currentMarble = insertMarble(currentMarble, i);
     } else {
-      currentMarble = getDeletionIndex(currentMarble);
+      currentMarble = getDeleteAt(currentMarble);
 
       let currentPlayerScore = players[currentPlayer];
       currentPlayerScore += i;
       currentPlayerScore += getMarbleValue(currentMarble);
       players[currentPlayer] = currentPlayerScore;
 
-      deleteMarble(currentMarble);
+      currentMarble = deleteMarble(currentMarble);
     }
+
+//    if (i < 5)
+//      printCircle();
   }
 
   let maxScore = 0;
@@ -91,6 +118,11 @@ function playGame(maxMarbleValue) {
   console.log('Max score is', maxScore, 'played in', end - start, 'ms');
 }
 
-playGame(lastMarbleValue*4);
+// Part 1
+playGame(lastMarbleValue);
+
+// Part 2
+playGame(lastMarbleValue * 10);
+playGame(lastMarbleValue * 100);
 
 console.log('END');
