@@ -13,8 +13,6 @@ let rawInput = inputData.split(/[ \n]+/);
 let numberOfPlayers = rawInput[0];
 let lastMarbleValue = rawInput[6];
 
-console.log(numberOfPlayers, 'players; last marble is worth', lastMarbleValue, 'points');
-
 function getNextPlayer(currentPlayer) {
   currentPlayer++;
   if (currentPlayer > numberOfPlayers) {
@@ -23,51 +21,76 @@ function getNextPlayer(currentPlayer) {
   return currentPlayer;
 }
 
-function getInsertionIndex(currentIndex, circleSize) {
-  let newIndex = currentIndex + 1;
-  return newIndex % circleSize + 1;
+let circle;
+function initCircle() {
+  circle = [0];
+  return 0;
 }
 
-function getDeletionIndex(currentIndex, circleSize) {
+function getInsertionIndex(currentIndex) {
+  let newIndex = currentIndex + 1;
+  return newIndex % circle.length + 1;
+}
+
+function getDeletionIndex(currentIndex) {
   let newIndex = currentIndex - 7;
   if (newIndex < 0) {
-    newIndex += circleSize;
+    newIndex += circle.length;
   }
   return newIndex;
 }
 
-let players = [];
-for (i = 0; i < numberOfPlayers; i++) {
-  players[i] = 0;
+function insertMarble(currentMarble, value) {
+  circle.splice(currentMarble, 0, value);
 }
 
-let circle = [0];
-let currentPlayer = 0;
-let currentMarble = 0;
-for (let i = 1; i <= lastMarbleValue; i++) {
-  currentPlayer = getNextPlayer(currentPlayer);
-  if (i % 23) {
-    currentMarble = getInsertionIndex(currentMarble, circle.length);
-    circle.splice(currentMarble, 0, i);
-  } else {
-    currentMarble = getDeletionIndex(currentMarble, circle.length);
-
-    let currentPlayerScore = players[currentPlayer];
-    currentPlayerScore += i;
-    currentPlayerScore += circle[currentMarble];
-    players[currentPlayer] = currentPlayerScore;
-
-    circle.splice(currentMarble, 1);
-  }
+function deleteMarble(currentMarble) {
+  circle.splice(currentMarble, 1);
 }
 
-let maxScore = 0;
-players.forEach(function(score) {
-  if (score > maxScore) {
-    maxScore = score;
-  }
-})
+function getMarbleValue(currentMarble) {
+  return circle[currentMarble];
+}
 
-console.log('Max score is', maxScore);
+function playGame(maxMarbleValue) {
+  console.log(numberOfPlayers, 'players; last marble is worth', maxMarbleValue, 'points');
+
+  let start = Date.now();
+  let players = [];
+  for (i = 0; i < numberOfPlayers; i++) {
+    players[i] = 0;
+  }
+
+  let currentPlayer = 0;
+  let currentMarble = initCircle();
+  for (let i = 1; i <= maxMarbleValue; i++) {
+    currentPlayer = getNextPlayer(currentPlayer);
+    if (i % 23) {
+      currentMarble = getInsertionIndex(currentMarble);
+      insertMarble(currentMarble, i);
+    } else {
+      currentMarble = getDeletionIndex(currentMarble);
+
+      let currentPlayerScore = players[currentPlayer];
+      currentPlayerScore += i;
+      currentPlayerScore += getMarbleValue(currentMarble);
+      players[currentPlayer] = currentPlayerScore;
+
+      deleteMarble(currentMarble);
+    }
+  }
+
+  let maxScore = 0;
+  players.forEach(function (score) {
+    if (score > maxScore) {
+      maxScore = score;
+    }
+  });
+
+  let end = Date.now();
+  console.log('Max score is', maxScore, 'played in', end - start, 'ms');
+}
+
+playGame(lastMarbleValue*4);
 
 console.log('END');
